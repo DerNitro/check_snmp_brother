@@ -19,7 +19,7 @@ if [ ! $SNMP ]; then
 fi
 
 if [ $# -lt 4 ]; then
-	echo "usage : check_snmp_brother COMMUNITY HOST COMMAND WARNING CRITICAL"
+	echo "usage : check_snmp_brother COMMUNITY HOST WARNING CRITICAL"
 	echo "COMMUNITY - set the community string"
 	echo "HOST - set the host string"
 	echo "WARNING - set value Warning"
