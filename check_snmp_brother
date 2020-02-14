@@ -1,0 +1,55 @@
+#!/bin/bash
+#################################################
+# SNMP Monitoring Black Cartridge Printer brother
+# Testing Printer List:
+# 1. Brother DCP-7065DN
+# 2. Brother MFC-9010CN (only black toner) Thanks! Diego Morais
+# Sergey <DerNitro> Utkin
+# mailto:utkins01@gmail.com
+#################################################
+
+export PATH=:/bin:/sbin/:/usr/bin:/usr/sbin
+
+SNMP=snmpget
+OID=1.3.6.1.4.1.2435.2.3.9.4.2.1.5.5.8.0
+
+if [ ! $SNMP ]; then
+	echo "$SNMP Fail"
+	exit 3
+fi
+
+if [ $# -lt 4 ]; then
+	echo "usage : check_snmp_brother COMMUNITY HOST COMMAND WARNING CRITICAL"
+	echo "COMMUNITY - set the community string"
+	echo "HOST - set the host string"
+	echo "WARNING - set value Warning"
+	echo "CRITICAL - set value Critical"
+	exit 3
+else
+	COMMUNITY=$1
+	HOST=$2
+	WARNING=$3
+	CRITICAL=$4
+fi
+
+RESULT=`$SNMP -v 2c -c $COMMUNITY $HOST $OID`
+if [ -z "$RESULT" ]; then
+	echo "Timeout: No Response from "$HOST
+	exit 3
+fi
+RESULT=${RESULT:(-9):5}
+RESULT='0x'${RESULT// /}
+RESULT=$(($RESULT/100))
+
+if [ $((RESULT)) -lt $((WARNING)) ]; then
+	if [ $((RESULT)) -lt $((CRITICAL)) ]; then
+		echo "CRITICAL - Toner Cartridge "$RESULT"%"
+		exit 2
+	else
+		echo "WARNING - Toner Cartridge "$RESULT"%"
+		exit 1
+	fi
+else
+	echo "OK - Toner Cartridge "$RESULT"%"
+	exit 0
+fi
